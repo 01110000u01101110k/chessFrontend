@@ -1,0 +1,43 @@
+.main {
+    width: 100%;
+    height: 90vh;
+}
+
+.board {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 400px;
+    height: 400px;
+}
+
+.white_piece {
+    color: rgb(173, 173, 173);
+}
+
+.black_piece {
+    color: rgb(163, 130, 0);
+}
+
+.white_cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background-color: rgb(224, 224, 224);
+    font-size: 40px;
+    cursor: pointer;
+}
+
+.black_cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background-color: rgb(44, 44, 44);
+    font-size: 40px;
+    cursor: pointer;
+}
