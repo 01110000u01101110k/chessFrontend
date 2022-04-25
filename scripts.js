@@ -95,7 +95,6 @@ board.addEventListener(
     }
 
     const is_right_step = () => {
-      console.log(dragged.id.slice(0,5), event.target.id.slice(0,5))
       if(dragged.id.slice(0,5) === "white" && event.target.id.slice(0,5) === "white"
       || dragged.id.slice(0,5) === "black" && event.target.id.slice(0,5) === "black") {
         return false;
@@ -234,19 +233,21 @@ const create_board = () => {
 
     div.id = `cell_x=${x}_y=${y}`;
 
-    if (y < 4) {
-      piece.classList.add("white_piece");
-      piece.id = `white_${figureschess_pieces[y - 1][x - 1] || "piece"}`;
-    } else {
-      piece.classList.add("black_piece");
-      piece.id = `black_${figureschess_pieces[y - 1][x - 1] || "piece"}`;
-    }
-
-    piece.innerText = figureschess_pieces[y - 1][x - 1];
-    piece.setAttribute("draggable", "true");
-
     let wrap_div = board.appendChild(div);
-    wrap_div.appendChild(piece);
+
+    if(figureschess_pieces[y - 1][x - 1]){
+      if (y < 4) {
+        piece.classList.add("white_piece");
+        piece.id = `white_${figureschess_pieces[y - 1][x - 1]}`;
+      } else {
+        piece.classList.add("black_piece");
+        piece.id = `black_${figureschess_pieces[y - 1][x - 1]}`;
+      }
+      piece.innerText = figureschess_pieces[y - 1][x - 1];
+      piece.setAttribute("draggable", "true");
+
+      wrap_div.appendChild(piece);
+    }
   }
 };
 
