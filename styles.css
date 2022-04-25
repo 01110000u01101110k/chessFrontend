@@ -1,6 +1,38 @@
+:root {
+    --main-color: rgb(36, 36, 36);
+    --second-color: rgb(241, 223, 15);
+    --main-text: rgb(52, 52, 52);
+}
+
+body {
+    height: 98vh;
+    background-color: var(--main-color);
+    color: var(--main-text);
+    font-size: 20px;
+}
+
+header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 8vh;
+    background-color: var(--second-color);
+}
+
 .main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     height: 90vh;
+}
+
+.nav_item {
+    margin: 0 10px;
+    cursor: pointer;
 }
 
 .board {
@@ -13,10 +45,22 @@
 }
 
 .white_piece {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    text-align: center;
     color: rgb(173, 173, 173);
 }
 
 .black_piece {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    text-align: center;
     color: rgb(163, 130, 0);
 }
 
