@@ -25,6 +25,183 @@ let figureschess_pieces = [
 
 let dragged;
 
+const is_right_step = (dragged, target) => {
+  if(dragged.id.slice(0,5) === "white" && target.id.slice(0,5) === "white"
+  || dragged.id.slice(0,5) === "black" && target.id.slice(0,5) === "black") {
+    return false;
+  } // проверяю не является ли ход попыткой побить свою фигуру.
+
+  const is_right_straight_steps = () => {
+    if(Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 0 && Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) !== 0) {
+      for(let i = 1; i <= Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)); i++){
+        let result;
+
+        if(+dragged.parentNode.id.slice(11) < +target.id.slice(11)){
+          board.childNodes.forEach((element) => (
+            element.id === dragged.parentNode.id.slice(0, 11) + (+dragged.parentNode.id.slice(11) + i)) ?
+            result = element :
+            null
+          );
+        } else {
+          board.childNodes.forEach((element) => (
+            element.id === dragged.parentNode.id.slice(0, 11) + (+dragged.parentNode.id.slice(11) - i)) ?
+            result = element :
+            null
+          );
+        }
+
+        if(result.childNodes.length > 0) {
+          return false;
+        }
+      }
+      return true;
+    } else if(Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) !== 0 && Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 0) {
+      for(let i = 1; i <= Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)); i++){
+        let result;
+
+        if(+dragged.parentNode.id.slice(7, 8) < +target.id.slice(7, 8)){
+          board.childNodes.forEach((element) => (
+            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) + i) + dragged.parentNode.id.slice(8)) ?
+            result = element :
+            null
+          );
+        } else {
+          board.childNodes.forEach((element) => (
+            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) - i) + dragged.parentNode.id.slice(8)) ?
+            result = element :
+            null
+          );
+        }
+
+        if(result.childNodes.length > 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  const check_obliquely_steps = () => {
+    if(Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11))) {
+      for(let i = 1; i <= Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)); i++){
+        let result;
+        if(Math.sign(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === -1 && Math.sign(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === -1){
+          board.childNodes.forEach((element) => (
+            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) - i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) - i)) ?
+            result = element :
+            null
+          );
+        } else if(Math.sign(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 && Math.sign(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1) {
+          board.childNodes.forEach((element) => (
+            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) + i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) + i)) ?
+            result = element :
+            null
+          );
+        } else if(Math.sign(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 && Math.sign(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === -1){
+          board.childNodes.forEach((element) => (
+            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) + i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) - i)) ?
+            result = element :
+            null
+          );
+        } else if(Math.sign(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === -1 && Math.sign(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1){
+          board.childNodes.forEach((element) => (
+            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) - i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) + i)) ?
+            result = element :
+            null
+          );
+        }
+
+        if(result.childNodes.length > 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  if(dragged.id === `white_${pawn}` || dragged.id === `black_${pawn}`){
+    if(is_right_straight_steps()){
+      if(dragged.id === `black_${pawn}` &&
+        dragged.parentNode.id.slice(7, 8) === target.id.slice(7, 8) &&
+        (target.id.indexOf('y=6') !== -1 ||
+        target.id.indexOf('y=5') !== -1) &&
+        dragged.parentNode.id.slice(11) > target.id.slice(11)) {
+        return true;
+      } else if(dragged.id === `white_${pawn}` &&
+        dragged.parentNode.id.slice(7, 8) === target.id.slice(7, 8) &&
+        (target.id.indexOf('y=3') !== -1 ||
+        target.id.indexOf('y=4') !== -1) &&
+        dragged.parentNode.id.slice(11) > target.id.slice(11)) {
+        return true;
+      } else if(dragged.id === `black_${pawn}` &&
+      dragged.parentNode.id.slice(7, 8) === target.id.slice(7, 8) &&
+      +dragged.parentNode.id.slice(11) - 1 == target.id.slice(11)) {
+        return true;
+      } else if(dragged.id === `white_${pawn}` &&
+      dragged.parentNode.id.slice(7, 8) === target.id.slice(7, 8) &&
+      +dragged.parentNode.id.slice(11) + 1 == target.id.slice(11)){
+        return true;
+      }
+    }
+  } else if(dragged.id === `white_${bishop}` || dragged.id === `black_${bishop}`) {
+    if(check_obliquely_steps()) {
+      return true;
+    }
+  } else if(dragged.id === `white_${horse}` || dragged.id === `black_${horse}`) {
+    if(
+      (Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 &&
+      Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 2) ||
+      (Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 2 &&
+      Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1)
+    ) {
+      return true;
+    }
+  } else if(dragged.id === `white_${rook}` || dragged.id === `black_${rook}`) {
+    if(is_right_straight_steps()){
+      return true;
+    }
+  } else if(dragged.id === `white_${queen}` || dragged.id === `black_${queen}`) {
+    if(check_obliquely_steps() ||
+      is_right_straight_steps()
+    ) {
+      return true;
+    }
+  } else if(dragged.id === `white_${king}` || dragged.id === `black_${king}`) {
+    if(
+      (Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 &&
+      Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1) ||
+      (Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 &&
+      Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 0) ||
+      (Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 0 &&
+      Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const is_attacked = (dragged, target) => {
+  if(dragged.id.indexOf("white") > -1 && target.id.indexOf("black") > -1 || dragged.id.indexOf("black") > -1 && target.id.indexOf("white") > -1){
+    if(dragged.id === `black_${pawn}`) {
+      if(+target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === -1 && +target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === -1 ||
+        +target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === 1 && +target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === -1
+        ){
+          return true;
+        }
+    } else if(dragged.id === `white_${pawn}`) {
+      if(+target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === -1 && +target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === 1 ||
+        +target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === 1 && +target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === 1
+        ){
+          return true;
+        }
+    } else {
+      return true;
+    }
+  }
+}
+
 /* events fired on the draggable target */
 board.addEventListener("drag", function (event) {
   event.target.style.opacity = 0;
@@ -88,180 +265,9 @@ board.addEventListener(
     event.preventDefault();
     // move dragged elem to the selected drop target
 
-    const is_right_step = () => {
-      if(dragged.id.slice(0,5) === "white" && event.target.id.slice(0,5) === "white"
-      || dragged.id.slice(0,5) === "black" && event.target.id.slice(0,5) === "black") {
-        return false;
-      } // проверяю не является ли ход попыткой побить свою фигуру.
-
-      const is_right_straight_steps = () => {
-        if(Math.abs(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 0 && Math.abs(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) !== 0) {
-          for(let i = 1; i <= Math.abs(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)); i++){
-            let result;
-
-            if(+dragged.parentNode.id.slice(11) < +event.target.id.slice(11)){
-              board.childNodes.forEach((element) => (
-                element.id === dragged.parentNode.id.slice(0, 11) + (+dragged.parentNode.id.slice(11) + i)) ?
-                result = element :
-                null
-              );
-            } else {
-              board.childNodes.forEach((element) => (
-                element.id === dragged.parentNode.id.slice(0, 11) + (+dragged.parentNode.id.slice(11) - i)) ?
-                result = element :
-                null
-              );
-            }
-
-            if(result.childNodes.length > 0) {
-              return false;
-            }
-          }
-          return true;
-        } else if(Math.abs(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) !== 0 && Math.abs(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 0) {
-          for(let i = 1; i <= Math.abs(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)); i++){
-            let result;
-
-            if(+dragged.parentNode.id.slice(7, 8) < +event.target.id.slice(7, 8)){
-              board.childNodes.forEach((element) => (
-                element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) + i) + dragged.parentNode.id.slice(8)) ?
-                result = element :
-                null
-              );
-            } else {
-              board.childNodes.forEach((element) => (
-                element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) - i) + dragged.parentNode.id.slice(8)) ?
-                result = element :
-                null
-              );
-            }
-
-            if(result.childNodes.length > 0) {
-              return false;
-            }
-          }
-          return true;
-        }
-      }
-
-      const check_obliquely_steps = () => {
-        if(Math.abs(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === Math.abs(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11))) {
-          for(let i = 1; i <= Math.abs(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)); i++){
-            let result;
-            if(Math.sign(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === -1 && Math.sign(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) === -1){
-              board.childNodes.forEach((element) => (
-                element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) - i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) - i)) ?
-                result = element :
-                null
-              );
-            } else if(Math.sign(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 && Math.sign(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1) {
-              board.childNodes.forEach((element) => (
-                element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) + i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) + i)) ?
-                result = element :
-                null
-              );
-            } else if(Math.sign(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 && Math.sign(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) === -1){
-              board.childNodes.forEach((element) => (
-                element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) + i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) - i)) ?
-                result = element :
-                null
-              );
-            } else if(Math.sign(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === -1 && Math.sign(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1){
-              board.childNodes.forEach((element) => (
-                element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) - i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) + i)) ?
-                result = element :
-                null
-              );
-            }
-
-            if(result.childNodes.length > 0) {
-              return false;
-            }
-          }
-          return true;
-        }
-      }
-
-      if(dragged.id === `white_${pawn}` || dragged.id === `black_${pawn}`){
-        if(is_right_straight_steps()){
-          if(dragged.id === `black_${pawn}` &&
-            dragged.parentNode.id.slice(7, 8) === event.target.id.slice(7, 8) &&
-            (event.target.id.indexOf('y=6') !== -1 ||
-            event.target.id.indexOf('y=5') !== -1) &&
-            dragged.parentNode.id.slice(11) > event.target.id.slice(11)) {
-            return true;
-          } else if(dragged.id === `white_${pawn}` &&
-            dragged.parentNode.id.slice(7, 8) === event.target.id.slice(7, 8) &&
-            (event.target.id.indexOf('y=3') !== -1 ||
-            event.target.id.indexOf('y=4') !== -1) &&
-            dragged.parentNode.id.slice(11) > event.target.id.slice(11)) {
-            return true;
-          } else if(dragged.id === `black_${pawn}` &&
-          dragged.parentNode.id.slice(7, 8) === event.target.id.slice(7, 8) &&
-          +dragged.parentNode.id.slice(11) - 1 == event.target.id.slice(11)) {
-            return true;
-          } else if(dragged.id === `white_${pawn}` &&
-          dragged.parentNode.id.slice(7, 8) === event.target.id.slice(7, 8) &&
-          +dragged.parentNode.id.slice(11) + 1 == event.target.id.slice(11)){
-            return true;
-          }
-        }
-      } else if(dragged.id === `white_${bishop}` || dragged.id === `black_${bishop}`) {
-        if(check_obliquely_steps()) {
-          return true;
-        }
-      } else if(dragged.id === `white_${horse}` || dragged.id === `black_${horse}`) {
-        if(
-          (Math.abs(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 &&
-          Math.abs(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 2) ||
-          (Math.abs(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 2 &&
-          Math.abs(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1)
-        ) {
-          return true;
-        }
-      } else if(dragged.id === `white_${rook}` || dragged.id === `black_${rook}`) {
-        if(is_right_straight_steps()){
-          return true;
-        }
-      } else if(dragged.id === `white_${queen}` || dragged.id === `black_${queen}`) {
-        if(check_obliquely_steps() ||
-          is_right_straight_steps()
-        ) {
-          return true;
-        }
-      } else if(dragged.id === `white_${king}` || dragged.id === `black_${king}`) {
-        if(
-          (Math.abs(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 &&
-          Math.abs(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1) ||
-          (Math.abs(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 &&
-          Math.abs(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 0) ||
-          (Math.abs(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 0 &&
-          Math.abs(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1)
-        ) {
-          return true;
-        }
-      }
-
-      return false;
-    }
-
-    const is_attacked = () => {
-      if(dragged.id.indexOf("white") > -1 && event.target.id.indexOf("black") > -1 || dragged.id.indexOf("black") > -1 && event.target.id.indexOf("white") > -1){
-        if(dragged.id.indexOf(pawn) > - 1) {
-          if(+event.target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === -1 && +event.target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === -1 ||
-            +event.target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === 1 && +event.target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === -1
-            ){
-              return true;
-            }
-        } else {
-          return true;
-        }
-      }
-    }
-
     const dragged_target = (attacked) => {
       event.target.style.background = "";
-
+    
       dragged.parentNode.removeChild(dragged);
       if(attacked){
         event.target.parentNode.appendChild(dragged);
@@ -271,9 +277,9 @@ board.addEventListener(
       }
     }
 
-    if(is_attacked()){
+    if(is_attacked(dragged, event.target)){
       dragged_target(true);
-    } else if(is_right_step()) {
+    } else if(is_right_step(dragged, event.target)) {
       dragged_target();
     }
 
