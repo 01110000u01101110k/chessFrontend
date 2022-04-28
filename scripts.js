@@ -88,21 +88,11 @@ board.addEventListener(
     event.preventDefault();
     // move dragged elem to the selected drop target
 
-    const dragged_target = () => {
-      event.target.style.background = "";
-      dragged.parentNode.removeChild(dragged);
-      event.target.appendChild(dragged);
-    }
-
     const is_right_step = () => {
       if(dragged.id.slice(0,5) === "white" && event.target.id.slice(0,5) === "white"
       || dragged.id.slice(0,5) === "black" && event.target.id.slice(0,5) === "black") {
         return false;
       } // проверяю не является ли ход попыткой побить свою фигуру.
-
-      /*console.log("y", +event.target.id.slice(11) - +dragged.parentNode.id.slice(11))
-
-      console.log("x", +event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8))*/
 
       const is_right_straight_steps = () => {
         if(Math.abs(+event.target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 0 && Math.abs(+event.target.id.slice(11) - +dragged.parentNode.id.slice(11)) !== 0) {
@@ -255,34 +245,36 @@ board.addEventListener(
       return false;
     }
 
-    const is_right_attack = () => {
-      if(dragged.id === `white_${pawn}` || dragged.id === `black_${pawn}`){
-        if(dragged.id === `black_${pawn}` && dragged.parentNode.id.slice(7, 8) && event.target.id.slice(11)) {
-          return true;
-        } else if(dragged.id === `white_${pawn}` && dragged.parentNode.id.slice(7, 8) && event.target.id.slice(11)) {
+    const is_attacked = () => {
+      if(dragged.id.indexOf("white") > -1 && event.target.id.indexOf("black") > -1 || dragged.id.indexOf("black") > -1 && event.target.id.indexOf("white") > -1){
+        if(dragged.id.indexOf(pawn) > - 1) {
+          if(+event.target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === -1 && +event.target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === -1 ||
+            +event.target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === 1 && +event.target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === -1
+            ){
+              return true;
+            }
+        } else {
           return true;
         }
-      } else if(dragged.id === `white_${bishop}` || dragged.id === `black_${bishop}`) {
-        return true;
-      } else if(dragged.id === `white_${horse}` || dragged.id === `black_${horse}`) {
-        return true;
-      } else if(dragged.id === `white_${rook}` || dragged.id === `black_${rook}`) {
-        return true;
-      } else if(dragged.id === `white_${queen}` || dragged.id === `black_${queen}`) {
-        return true;
-      } else if(dragged.id === `white_${king}` || dragged.id === `black_${king}`) {
-        return true;
       }
     }
 
-    if(is_right_step()) {
-      if(dragged){
-        if(is_right_attack()){
-          dragged_target();
-        }
+    const dragged_target = (attacked) => {
+      event.target.style.background = "";
+
+      dragged.parentNode.removeChild(dragged);
+      if(attacked){
+        event.target.parentNode.appendChild(dragged);
+        event.target.remove();
       } else {
-        dragged_target();
+        event.target.appendChild(dragged);
       }
+    }
+
+    if(is_attacked()){
+      dragged_target(true);
+    } else if(is_right_step()) {
+      dragged_target();
     }
 
   },
