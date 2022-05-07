@@ -1,7 +1,15 @@
 const board = document.getElementById("board");
 const start_button = document.getElementById("start_btn");
 
+const status = document.getElementById('status')
+const connectButton = document.getElementById('connect')
+const log = document.getElementById('log')
+const form = document.getElementById('chatform')
+const input = document.getElementById('text')
+
 //start_button.addEventListener("click", start);
+
+/* data */
 
 const count_cells = 64;
 
@@ -17,13 +25,132 @@ let figureschess_pieces = [
   [pawn,pawn,pawn,pawn,pawn,pawn,pawn,pawn],
   ["", "", "", "", "", "", "", ""],
   ["", "", "", "", "", "", "", ""],
-  ["", "", "", "", king, "", "", ""],
+  ["", "", "", "", "", "", "", ""],
   ["", "", "", "", "", "", "", ""],
   [pawn,pawn,pawn,pawn,pawn,pawn,pawn,pawn],
   [rook,horse,bishop,queen,king,bishop,horse,rook],
 ];
 
 let dragged;
+
+let whos_step = "white";
+
+/* connect to server */
+
+let socket = null;
+
+const set_log = (msg, type = 'status') => {
+  log.innerHTML += `<p class="msg msg--${type}">${msg}</p>`;
+  log.scrollTop += 1000;
+}
+
+function connect() {
+  disconnect();
+
+  const { location } = window;
+
+  const proto = location.protocol.startsWith('https') ? 'wss' : 'ws';
+  const wsUri = `${proto}://${location.host}/ws`;
+
+  set_log('Connecting...');
+  socket = new WebSocket(wsUri);
+
+  socket.onopen = () => {
+    set_log('Connected');
+    updateConnectionStatus();
+  }
+
+  socket.onmessage = (ev) => {
+    if(ev.data.indexOf("cell_x") > -1){
+      update_position(ev.data);
+    }
+    set_log('Received: ' + ev.data, 'message');
+  }
+
+  socket.onclose = () => {
+    set_log('Disconnected');
+    socket = null;
+    updateConnectionStatus();
+  }
+}
+
+function update_position(data_from_server) {
+  const data = data_from_server.split(' ');
+
+  let piece_from;
+  let piece_to;
+  let is_attacked = data[2];
+
+  board.childNodes.forEach((element) => (
+    element.id === data[0] ?
+    piece_from = element :
+    element.id === data[1] ?
+    piece_to = element
+    : null
+  ));
+
+  dragged_target(piece_from, piece_to, is_attacked, true);
+}
+
+function disconnect() {
+  if (socket) {
+    set_log('Disconnecting...');
+    socket.close();
+    socket = null;
+
+    updateConnectionStatus();
+  }
+}
+
+function updateConnectionStatus() {
+  if (socket) {
+    status.style.backgroundColor = 'transparent';
+    status.style.color = 'green';
+    status.textContent = `connected`;
+    connectButton.innerHTML = 'Disconnect';
+    input.focus();
+  } else {
+    status.style.backgroundColor = 'red';
+    status.style.color = 'white';
+    status.textContent = 'disconnected';
+    connectButton.textContent = 'Connect';
+  }
+}
+
+connectButton.addEventListener('click', () => {
+  if (socket) {
+    disconnect();
+  } else {
+    connect();
+  }
+
+  updateConnectionStatus();
+})
+
+form.addEventListener('submit', (ev) => {
+  ev.preventDefault();
+
+  const text = input.value;
+
+  set_log('Sending: ' + text);
+  socket.send(text);
+
+  input.value = '';
+  input.focus();
+})
+
+updateConnectionStatus();
+
+
+/* game rules */
+
+function change_whos_step() {
+  if(whos_step === "white") {
+    whos_step = "black"
+  } else {
+    whos_step = "white"
+  }
+}
 
 const is_right_step = (dragged, target) => {
   if(dragged.id.slice(0,5) === "white" && target.id.slice(0,5) === "white"
@@ -258,6 +385,45 @@ board.addEventListener(
   false
 );
 
+function dragged_target(dragged, target, attacked, is_from_server) {
+  target.style.background = "";
+
+  if(attacked){
+    if(!is_from_server) {
+      if(socket){
+        socket.send(`/chess_step ${dragged.parentNode.id} ${target.parentNode.id} ${attacked}`);
+      }
+
+      dragged.parentNode.removeChild(dragged);
+      target.parentNode.appendChild(dragged);
+      target.remove();
+    } else {
+      let drag_child = dragged.children[0];
+      let target_child = target.children[0];
+
+      dragged.removeChild(drag_child);
+      target.appendChild(drag_child);
+      target_child.remove();
+    }
+  } else {
+    if(!is_from_server) {
+      if(socket){
+        socket.send(`/chess_step ${dragged.parentNode.id} ${target.id} ${attacked}`);
+      }
+
+      dragged.parentNode.removeChild(dragged);
+      target.appendChild(dragged);
+    } else {
+      let drag_child = dragged.children[0];
+
+      dragged.removeChild(drag_child);
+      target.appendChild(drag_child);
+    }
+  }
+
+  change_whos_step();
+}
+
 board.addEventListener(
   "drop",
   (event) => {
@@ -265,22 +431,14 @@ board.addEventListener(
     event.preventDefault();
     // move dragged elem to the selected drop target
 
-    const dragged_target = (attacked) => {
-      event.target.style.background = "";
-    
-      dragged.parentNode.removeChild(dragged);
-      if(attacked){
-        event.target.parentNode.appendChild(dragged);
-        event.target.remove();
-      } else {
-        event.target.appendChild(dragged);
+    if(dragged.id.indexOf("white") > -1 && whos_step === "white" ||
+       dragged.id.indexOf("black") > -1 && whos_step === "black"
+    ) {
+      if(is_attacked(dragged, event.target)){
+        dragged_target(dragged, event.target, true, false);
+      } else if(is_right_step(dragged, event.target)) {
+        dragged_target(dragged, event.target, false, false);
       }
-    }
-
-    if(is_attacked(dragged, event.target)){
-      dragged_target(true);
-    } else if(is_right_step(dragged, event.target)) {
-      dragged_target();
     }
 
   },

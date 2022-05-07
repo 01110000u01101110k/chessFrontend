@@ -1,6 +1,6 @@
 :root {
     --main-color: rgb(36, 36, 36);
-    --second-color: rgb(241, 223, 15);
+    --second-color: rgb(234, 182, 28);
     --main-text: rgb(52, 52, 52);
 }
 
@@ -9,6 +9,7 @@ body {
     background-color: var(--main-color);
     color: var(--main-text);
     font-size: 20px;
+    font-family: 'Roboto', sans-serif;
 }
 
 header {
@@ -37,6 +38,11 @@ header {
     cursor: pointer;
 }
 
+.chat {
+  width: 200px;
+  margin: 10px;
+}
+
 .board {
     display: flex;
     flex-wrap: wrap;
@@ -44,6 +50,7 @@ header {
     align-items: center;
     width: 600px;
     height: 600px;
+    margin: 10px;
 }
 
 .white_piece {
@@ -53,7 +60,7 @@ header {
     width: 100%;
     height: 100%;
     text-align: center;
-    color: rgb(173, 173, 173);
+    color: rgb(134, 131, 123);
 }
 
 .black_piece {
@@ -63,7 +70,7 @@ header {
     width: 100%;
     height: 100%;
     text-align: center;
-    color: rgb(163, 130, 0);
+    color: rgb(134, 118, 70);
 }
 
 .white_cell {
@@ -87,3 +94,48 @@ header {
     font-size: 65px;
     cursor: pointer;
 }
+
+
+
+
+
+  input[type='text'] {
+    font-size: inherit;
+  }
+
+  #log {
+    width: 30em;
+    height: 20em;
+    overflow: auto;
+    margin: 0.5em 0;
+
+    border: 1px solid black;
+  }
+
+  #status {
+    padding: 0 0.2em;
+  }
+
+  #text {
+    width: 17em;
+    padding: 0.5em;
+  }
+
+  .msg {
+    margin: 0;
+    padding: 0.25em 0.5em;
+  }
+
+  .msg--status {
+    /* a light yellow */
+    background-color: #ffffc9;
+  }
+
+  .msg--message {
+    /* a light blue */
+    background-color: #d2f4ff;
+  }
+
+  .msg--error {
+    background-color: pink;
+  }
