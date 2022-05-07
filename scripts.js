@@ -282,7 +282,7 @@ const is_right_step = (dragged, target) => {
         dragged.parentNode.id.slice(7, 8) === target.id.slice(7, 8) &&
         (target.id.indexOf('y=3') !== -1 ||
         target.id.indexOf('y=4') !== -1) &&
-        dragged.parentNode.id.slice(11) > target.id.slice(11)) {
+        dragged.parentNode.id.slice(11) < target.id.slice(11)) {
         return true;
       } else if(dragged.id === `black_${pawn}` &&
       dragged.parentNode.id.slice(7, 8) === target.id.slice(7, 8) &&
