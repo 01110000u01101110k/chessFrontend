@@ -21,19 +21,21 @@ const queen = "♛";
 const king = "♚";
 
 let figureschess_pieces = [
-  [rook,horse,bishop,queen,king,bishop,horse,rook],
-  [pawn,pawn,pawn,pawn,pawn,pawn,pawn,pawn],
-  ["", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", ""],
-  [pawn,pawn,pawn,pawn,pawn,pawn,pawn,pawn],
-  [rook,horse,bishop,queen,king,bishop,horse,rook],
+  [rook,horse,bishop,king,queen,bishop,horse,rook],
+  [pawn, pawn, pawn, pawn, pawn, pawn, pawn, pawn],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [pawn, pawn, pawn, pawn, pawn, pawn, pawn, pawn],
+  [rook,horse,bishop,king,queen,bishop,horse,rook],
 ];
 
 let dragged;
 
 let whos_step = "white";
+
+let is_rotate_board = true;
 
 /* connect to server */
 
@@ -150,6 +152,28 @@ function change_whos_step() {
   } else {
     whos_step = "white"
   }
+}
+
+function rotate_board() {
+  if(is_rotate_board){
+    board.style.webkitTransform = 'rotate(180deg)';
+
+    board.childNodes.forEach((element, index) => {
+      index > 0 ?
+      element.style.webkitTransform = 'rotate(180deg)' :
+      null
+    })
+  } else {
+    board.style.webkitTransform = 'rotate(0deg)';
+
+    board.childNodes.forEach((element, index) => {
+      index > 0 ?
+      element.style.webkitTransform = 'rotate(0deg)' :
+      null
+    })
+  }
+
+  is_rotate_board = !is_rotate_board;
 }
 
 const is_right_step = (dragged, target) => {
