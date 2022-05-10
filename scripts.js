@@ -39,6 +39,8 @@ let is_rotate_board = true;
 
 /* connect to server */
 
+const chess_step = "chess-step";
+
 let socket = null;
 
 const set_log = (msg, type = 'status') => {
@@ -63,7 +65,7 @@ function connect() {
   }
 
   socket.onmessage = (ev) => {
-    if(ev.data.indexOf("cell_x") > -1){
+    if(ev.data.indexOf(chess_step) > -1){
       update_position(ev.data);
     }
     set_log('Received: ' + ev.data, 'message');
@@ -77,19 +79,29 @@ function connect() {
 }
 
 function update_position(data_from_server) {
-  const data = data_from_server.split(' ');
+  const data = data_from_server.split(" ")[1].split('_');
 
   let piece_from;
   let piece_to;
-  let is_attacked = data[2];
+  let is_attacked = data[4];
 
-  board.childNodes.forEach((element) => (
-    element.id === data[0] ?
-    piece_from = element :
-    element.id === data[1] ?
-    piece_to = element
-    : null
-  ));
+  board.childNodes.forEach((element, index) => {
+    if(index > 0) {
+      element.dataset.cell_position_x === data[0] &&
+      element.dataset.cell_position_y === data[1] ?
+      piece_from = element :
+      element.dataset.cell_position_x === data[2] &&
+      element.dataset.cell_position_y === data[3] ?
+      piece_to = element
+      : null
+    }
+  });
+
+  if(is_attacked === "true"){
+    is_attacked = true;
+  } else {
+    is_attacked = false;
+  }
 
   dragged_target(piece_from, piece_to, is_attacked, true);
 }
@@ -177,28 +189,34 @@ function rotate_board() {
 }
 
 const is_right_step = (dragged, target) => {
-  if(dragged.id.slice(0,5) === "white" && target.id.slice(0,5) === "white"
-  || dragged.id.slice(0,5) === "black" && target.id.slice(0,5) === "black") {
+  if(dragged.dataset.color === "white" && target.dataset.color === "white"
+  || dragged.dataset.color === "black" && target.dataset.color === "black") {
     return false;
   } // проверяю не является ли ход попыткой побить свою фигуру.
 
   const is_right_straight_steps = () => {
-    if(Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 0 && Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) !== 0) {
-      for(let i = 1; i <= Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)); i++){
+    if(Math.abs(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) === 0 && Math.abs(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y) !== 0) {
+      for(let i = 1; i <= Math.abs(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y); i++){
         let result;
 
-        if(+dragged.parentNode.id.slice(11) < +target.id.slice(11)){
-          board.childNodes.forEach((element) => (
-            element.id === dragged.parentNode.id.slice(0, 11) + (+dragged.parentNode.id.slice(11) + i)) ?
-            result = element :
-            null
-          );
+        if(+dragged.parentNode.dataset.cell_position_y < +target.dataset.cell_position_y){
+          board.childNodes.forEach((element, index) => {
+            if(index > 0) {
+              element.dataset.cell_position_x === dragged.parentNode.dataset.cell_position_x &&
+              element.dataset.cell_position_y === `${+dragged.parentNode.dataset.cell_position_y + i}` ?
+              result = element :
+              null
+            }
+          });
         } else {
-          board.childNodes.forEach((element) => (
-            element.id === dragged.parentNode.id.slice(0, 11) + (+dragged.parentNode.id.slice(11) - i)) ?
-            result = element :
-            null
-          );
+          board.childNodes.forEach((element, index) => {
+            if(index > 0) {
+              element.dataset.cell_position_x === dragged.parentNode.dataset.cell_position_x &&
+              element.dataset.cell_position_y === `${+dragged.parentNode.dataset.cell_position_y - i}` ?
+              result = element :
+              null
+            }
+          });
         }
 
         if(result.childNodes.length > 0) {
@@ -206,22 +224,28 @@ const is_right_step = (dragged, target) => {
         }
       }
       return true;
-    } else if(Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) !== 0 && Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 0) {
-      for(let i = 1; i <= Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)); i++){
+    } else if(Math.abs(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) !== 0 && Math.abs(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y) === 0) {
+      for(let i = 1; i <= Math.abs(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x); i++){
         let result;
 
-        if(+dragged.parentNode.id.slice(7, 8) < +target.id.slice(7, 8)){
-          board.childNodes.forEach((element) => (
-            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) + i) + dragged.parentNode.id.slice(8)) ?
-            result = element :
-            null
-          );
+        if(+dragged.parentNode.dataset.cell_position_x < +target.dataset.cell_position_x){
+          board.childNodes.forEach((element, index) => {
+            if(index > 0) {
+              element.dataset.cell_position_y === dragged.parentNode.dataset.cell_position_y &&
+              element.dataset.cell_position_x === `${+dragged.parentNode.dataset.cell_position_x + i}` ?
+              result = element :
+              null
+            }
+          });
         } else {
-          board.childNodes.forEach((element) => (
-            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) - i) + dragged.parentNode.id.slice(8)) ?
-            result = element :
-            null
-          );
+          board.childNodes.forEach((element, index) => {
+            if(index > 0) {
+              element.dataset.cell_position_y === dragged.parentNode.dataset.cell_position_y &&
+              element.dataset.cell_position_x === `${+dragged.parentNode.dataset.cell_position_x - i}` ?
+              result = element :
+              null
+            }
+          });
         }
 
         if(result.childNodes.length > 0) {
@@ -233,33 +257,45 @@ const is_right_step = (dragged, target) => {
   }
 
   const check_obliquely_steps = () => {
-    if(Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11))) {
-      for(let i = 1; i <= Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)); i++){
+    if(Math.abs(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) === Math.abs(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y)) {
+      for(let i = 1; i <= Math.abs(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y); i++){
         let result;
-        if(Math.sign(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === -1 && Math.sign(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === -1){
-          board.childNodes.forEach((element) => (
-            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) - i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) - i)) ?
-            result = element :
-            null
-          );
-        } else if(Math.sign(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 && Math.sign(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1) {
-          board.childNodes.forEach((element) => (
-            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) + i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) + i)) ?
-            result = element :
-            null
-          );
-        } else if(Math.sign(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 && Math.sign(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === -1){
-          board.childNodes.forEach((element) => (
-            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) + i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) - i)) ?
-            result = element :
-            null
-          );
-        } else if(Math.sign(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === -1 && Math.sign(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1){
-          board.childNodes.forEach((element) => (
-            element.id === dragged.parentNode.id.slice(0, 7) + (+dragged.parentNode.id.slice(7, 8) - i) + dragged.parentNode.id.slice(8, 11) + (+dragged.parentNode.id.slice(11) + i)) ?
-            result = element :
-            null
-          );
+        if(Math.sign(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) === -1 && Math.sign(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y) === -1){
+          board.childNodes.forEach((element, index) => {
+            if(index > 0) {
+              element.dataset.cell_position_x === `${+dragged.parentNode.dataset.cell_position_x - 1}` &&
+              element.dataset.cell_position_y === `${+dragged.parentNode.dataset.cell_position_y - 1}` ?
+              result = element :
+              null
+            }
+          });
+        } else if(Math.sign(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) === 1 && Math.sign(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y) === 1) {
+          board.childNodes.forEach((element, index) => {
+            if(index > 0) {
+              element.dataset.cell_position_x === `${+dragged.parentNode.dataset.cell_position_x + 1}` &&
+              element.dataset.cell_position_y === `${+dragged.parentNode.dataset.cell_position_y + 1}` ?
+              result = element :
+              null
+            }
+          });
+        } else if(Math.sign(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) === 1 && Math.sign(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y) === -1){
+          board.childNodes.forEach((element, index) => {
+            if(index > 0) {
+              element.dataset.cell_position_x === `${+dragged.parentNode.dataset.cell_position_x + 1}` &&
+              element.dataset.cell_position_y === `${+dragged.parentNode.dataset.cell_position_y - 1}` ?
+              result = element :
+              null
+            }
+          });
+        } else if(Math.sign(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) === -1 && Math.sign(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y) === 1){
+          board.childNodes.forEach((element, index) => {
+            if(index > 0) {
+              element.dataset.cell_position_x === `${+dragged.parentNode.dataset.cell_position_x - 1}` &&
+              element.dataset.cell_position_y === `${+dragged.parentNode.dataset.cell_position_y + 1}` ?
+              result = element :
+              null
+            }
+          });
         }
 
         if(result.childNodes.length > 0) {
@@ -270,61 +306,61 @@ const is_right_step = (dragged, target) => {
     }
   }
 
-  if(dragged.id === `white_${pawn}` || dragged.id === `black_${pawn}`){
+  if(dragged.dataset.piece === pawn){
     if(is_right_straight_steps()){
-      if(dragged.id === `black_${pawn}` &&
-        dragged.parentNode.id.slice(7, 8) === target.id.slice(7, 8) &&
-        (target.id.indexOf('y=6') !== -1 ||
-        target.id.indexOf('y=5') !== -1) &&
-        dragged.parentNode.id.slice(11) > target.id.slice(11)) {
+      if(dragged.dataset.color === "black" &&
+        dragged.parentNode.dataset.cell_position_x === target.dataset.cell_position_x &&
+        (target.dataset.cell_position_y === "6" ||
+        target.dataset.cell_position_y === "5") &&
+        dragged.parentNode.dataset.cell_position_y > target.dataset.cell_position_y) {
         return true;
-      } else if(dragged.id === `white_${pawn}` &&
-        dragged.parentNode.id.slice(7, 8) === target.id.slice(7, 8) &&
-        (target.id.indexOf('y=3') !== -1 ||
-        target.id.indexOf('y=4') !== -1) &&
-        dragged.parentNode.id.slice(11) < target.id.slice(11)) {
+      } else if(dragged.dataset.color === "white" &&
+        dragged.parentNode.dataset.cell_position_x === target.dataset.cell_position_x &&
+        (target.dataset.cell_position_y === "3" ||
+        target.dataset.cell_position_y === "4") &&
+        dragged.parentNode.dataset.cell_position_y < target.dataset.cell_position_y) {
         return true;
-      } else if(dragged.id === `black_${pawn}` &&
-      dragged.parentNode.id.slice(7, 8) === target.id.slice(7, 8) &&
-      +dragged.parentNode.id.slice(11) - 1 == target.id.slice(11)) {
+      } else if(dragged.dataset.color === "black" &&
+      dragged.parentNode.dataset.cell_position_x === target.dataset.cell_position_x &&
+      +dragged.parentNode.dataset.cell_position_y - 1 == target.dataset.cell_position_y) {
         return true;
-      } else if(dragged.id === `white_${pawn}` &&
-      dragged.parentNode.id.slice(7, 8) === target.id.slice(7, 8) &&
-      +dragged.parentNode.id.slice(11) + 1 == target.id.slice(11)){
+      } else if(dragged.dataset.color === "white" &&
+      dragged.parentNode.dataset.cell_position_x === target.dataset.cell_position_x &&
+      +dragged.parentNode.dataset.cell_position_y + 1 == target.dataset.cell_position_y){
         return true;
       }
     }
-  } else if(dragged.id === `white_${bishop}` || dragged.id === `black_${bishop}`) {
+  } else if(dragged.dataset.piece === bishop) {
     if(check_obliquely_steps()) {
       return true;
     }
-  } else if(dragged.id === `white_${horse}` || dragged.id === `black_${horse}`) {
+  } else if(dragged.dataset.piece === horse) {
     if(
-      (Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 &&
-      Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 2) ||
-      (Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 2 &&
-      Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1)
+      (Math.abs(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) === 1 &&
+      Math.abs(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y) === 2) ||
+      (Math.abs(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) === 2 &&
+      Math.abs(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y) === 1)
     ) {
       return true;
     }
-  } else if(dragged.id === `white_${rook}` || dragged.id === `black_${rook}`) {
+  } else if(dragged.dataset.piece === rook) {
     if(is_right_straight_steps()){
       return true;
     }
-  } else if(dragged.id === `white_${queen}` || dragged.id === `black_${queen}`) {
+  } else if(dragged.dataset.piece === queen) {
     if(check_obliquely_steps() ||
       is_right_straight_steps()
     ) {
       return true;
     }
-  } else if(dragged.id === `white_${king}` || dragged.id === `black_${king}`) {
+  } else if(dragged.dataset.piece === king) {
     if(
-      (Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 &&
-      Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1) ||
-      (Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 1 &&
-      Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 0) ||
-      (Math.abs(+target.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8)) === 0 &&
-      Math.abs(+target.id.slice(11) - +dragged.parentNode.id.slice(11)) === 1)
+      (Math.abs(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) === 1 &&
+      Math.abs(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y) === 1) ||
+      (Math.abs(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) === 1 &&
+      Math.abs(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y) === 0) ||
+      (Math.abs(+target.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x) === 0 &&
+      Math.abs(+target.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y) === 1)
     ) {
       return true;
     }
@@ -334,16 +370,16 @@ const is_right_step = (dragged, target) => {
 }
 
 const is_attacked = (dragged, target) => {
-  if(dragged.id.indexOf("white") > -1 && target.id.indexOf("black") > -1 || dragged.id.indexOf("black") > -1 && target.id.indexOf("white") > -1){
-    if(dragged.id === `black_${pawn}`) {
-      if(+target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === -1 && +target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === -1 ||
-        +target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === 1 && +target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === -1
+  if(dragged.dataset.color === "white" && target.dataset.color === "black" || dragged.dataset.color === "black" && target.dataset.color === "white"){
+    if(dragged.dataset.color === "black" && dragged.dataset.piece === pawn) {
+      if(+target.parentNode.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x === -1 && +target.parentNode.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y === -1 ||
+        +target.parentNode.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x === 1 && +target.parentNode.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y === -1
         ){
           return true;
         }
-    } else if(dragged.id === `white_${pawn}`) {
-      if(+target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === -1 && +target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === 1 ||
-        +target.parentNode.id.slice(7, 8) - +dragged.parentNode.id.slice(7, 8) === 1 && +target.parentNode.id.slice(11) - +dragged.parentNode.id.slice(11) === 1
+    } else if(dragged.dataset.color === "white" && dragged.dataset.piece === pawn) {
+      if(+target.parentNode.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x === -1 && +target.parentNode.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y === 1 ||
+        +target.parentNode.dataset.cell_position_x - +dragged.parentNode.dataset.cell_position_x === 1 && +target.parentNode.dataset.cell_position_y - +dragged.parentNode.dataset.cell_position_y === 1
         ){
           return true;
         }
@@ -415,7 +451,7 @@ function dragged_target(dragged, target, attacked, is_from_server) {
   if(attacked){
     if(!is_from_server) {
       if(socket){
-        socket.send(`/chess_step ${dragged.parentNode.id} ${target.parentNode.id} ${attacked}`);
+        socket.send(`${chess_step} ${dragged.parentNode.dataset.cell_position_x}_${dragged.parentNode.dataset.cell_position_y}_${target.parentNode.dataset.cell_position_x}_${target.parentNode.dataset.cell_position_y}_${attacked}`)
       }
 
       dragged.parentNode.removeChild(dragged);
@@ -426,13 +462,13 @@ function dragged_target(dragged, target, attacked, is_from_server) {
       let target_child = target.children[0];
 
       dragged.removeChild(drag_child);
-      target.appendChild(drag_child);
       target_child.remove();
+      target.appendChild(drag_child);
     }
   } else {
     if(!is_from_server) {
       if(socket){
-        socket.send(`/chess_step ${dragged.parentNode.id} ${target.id} ${attacked}`);
+        socket.send(`${chess_step} ${dragged.parentNode.dataset.cell_position_x}_${dragged.parentNode.dataset.cell_position_y}_${target.dataset.cell_position_x}_${target.dataset.cell_position_y}_${attacked}`);
       }
 
       dragged.parentNode.removeChild(dragged);
@@ -455,8 +491,8 @@ board.addEventListener(
     event.preventDefault();
     // move dragged elem to the selected drop target
 
-    if(dragged.id.indexOf("white") > -1 && whos_step === "white" ||
-       dragged.id.indexOf("black") > -1 && whos_step === "black"
+    if(dragged.dataset.color === "white" && whos_step === "white" ||
+       dragged.dataset.color === "black" && whos_step === "black"
     ) {
       if(is_attacked(dragged, event.target)){
         dragged_target(dragged, event.target, true, false);
@@ -504,6 +540,8 @@ const create_board = () => {
     }
 
     div.id = `cell_x=${x}_y=${y}`;
+    div.dataset.cell_position_x = x;
+    div.dataset.cell_position_y = y;
 
     let wrap_div = board.appendChild(div);
 
@@ -511,9 +549,15 @@ const create_board = () => {
       if (y < 4) {
         piece.classList.add("white_piece");
         piece.id = `white_${figureschess_pieces[y - 1][x - 1]}`;
+
+        piece.dataset.color = "white";
+        piece.dataset.piece = figureschess_pieces[y - 1][x - 1];
       } else {
         piece.classList.add("black_piece");
         piece.id = `black_${figureschess_pieces[y - 1][x - 1]}`;
+
+        piece.dataset.color = "black";
+        piece.dataset.piece = figureschess_pieces[y - 1][x - 1];
       }
       piece.innerText = figureschess_pieces[y - 1][x - 1];
       piece.setAttribute("draggable", "true");
