@@ -251,7 +251,7 @@ const is_right_step = (dragged, target) => {
 
   const is_right_straight_steps = () => {
     if(Math.abs(+target.dataset.cell_position_x - +dragged.dataset.cell_position_x) === 0 && Math.abs(+target.dataset.cell_position_y - +dragged.dataset.cell_position_y) !== 0) {
-      for(let i = 1; i <= Math.abs(+target.dataset.cell_position_y - +dragged.dataset.cell_position_y); i++){
+      for(let i = 1; i < Math.abs(+target.dataset.cell_position_y - +dragged.dataset.cell_position_y); i++){
         let result;
 
         if(+dragged.dataset.cell_position_y < +target.dataset.cell_position_y){
@@ -313,13 +313,13 @@ const is_right_step = (dragged, target) => {
 
   const check_obliquely_steps = () => {
     if(Math.abs(+target.dataset.cell_position_x - +dragged.dataset.cell_position_x) === Math.abs(+target.dataset.cell_position_y - +dragged.dataset.cell_position_y)) {
-      for(let i = 1; i <= Math.abs(+target.dataset.cell_position_y - +dragged.dataset.cell_position_y); i++){
+      for(let i = 1; i < Math.abs(+target.dataset.cell_position_y - +dragged.dataset.cell_position_y); i++){
         let result;
         if(Math.sign(+target.dataset.cell_position_x - +dragged.dataset.cell_position_x) === -1 && Math.sign(+target.dataset.cell_position_y - +dragged.dataset.cell_position_y) === -1){
           board.childNodes.forEach((element, index) => {
             if(index > 0) {
-              element.dataset.cell_position_x === `${+dragged.dataset.cell_position_x - 1}` &&
-              element.dataset.cell_position_y === `${+dragged.dataset.cell_position_y - 1}` ?
+              element.dataset.cell_position_x === `${+dragged.dataset.cell_position_x - i}` &&
+              element.dataset.cell_position_y === `${+dragged.dataset.cell_position_y - i}` ?
               result = element :
               null
             }
@@ -327,8 +327,8 @@ const is_right_step = (dragged, target) => {
         } else if(Math.sign(+target.dataset.cell_position_x - +dragged.dataset.cell_position_x) === 1 && Math.sign(+target.dataset.cell_position_y - +dragged.dataset.cell_position_y) === 1) {
           board.childNodes.forEach((element, index) => {
             if(index > 0) {
-              element.dataset.cell_position_x === `${+dragged.dataset.cell_position_x + 1}` &&
-              element.dataset.cell_position_y === `${+dragged.dataset.cell_position_y + 1}` ?
+              element.dataset.cell_position_x === `${+dragged.dataset.cell_position_x + i}` &&
+              element.dataset.cell_position_y === `${+dragged.dataset.cell_position_y + i}` ?
               result = element :
               null
             }
@@ -336,8 +336,8 @@ const is_right_step = (dragged, target) => {
         } else if(Math.sign(+target.dataset.cell_position_x - +dragged.dataset.cell_position_x) === 1 && Math.sign(+target.dataset.cell_position_y - +dragged.dataset.cell_position_y) === -1){
           board.childNodes.forEach((element, index) => {
             if(index > 0) {
-              element.dataset.cell_position_x === `${+dragged.dataset.cell_position_x + 1}` &&
-              element.dataset.cell_position_y === `${+dragged.dataset.cell_position_y - 1}` ?
+              element.dataset.cell_position_x === `${+dragged.dataset.cell_position_x + i}` &&
+              element.dataset.cell_position_y === `${+dragged.dataset.cell_position_y - i}` ?
               result = element :
               null
             }
@@ -345,8 +345,8 @@ const is_right_step = (dragged, target) => {
         } else if(Math.sign(+target.dataset.cell_position_x - +dragged.dataset.cell_position_x) === -1 && Math.sign(+target.dataset.cell_position_y - +dragged.dataset.cell_position_y) === 1){
           board.childNodes.forEach((element, index) => {
             if(index > 0) {
-              element.dataset.cell_position_x === `${+dragged.dataset.cell_position_x - 1}` &&
-              element.dataset.cell_position_y === `${+dragged.dataset.cell_position_y + 1}` ?
+              element.dataset.cell_position_x === `${+dragged.dataset.cell_position_x - i}` &&
+              element.dataset.cell_position_y === `${+dragged.dataset.cell_position_y + i}` ?
               result = element :
               null
             }
