@@ -44,8 +44,9 @@ header {
 }
 
 .board {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(75px, auto));
+    grid-template-rows: repeat(8, minmax(75px, auto));
     justify-content: center;
     align-items: center;
     width: 600px;
@@ -57,9 +58,9 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
     width: 100%;
     height: 100%;
-    text-align: center;
     color: rgb(134, 131, 123);
 }
 
@@ -67,9 +68,9 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
     width: 100%;
     height: 100%;
-    text-align: center;
     color: rgb(134, 118, 70);
 }
 
@@ -77,8 +78,8 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 75px;
-    height: 75px;
+    width: 100%;
+    height: 100%;
     background-color: rgb(224, 224, 224);
     font-size: 65px;
     cursor: pointer;
@@ -88,8 +89,8 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 75px;
-    height: 75px;
+    width: 100%;
+    height: 100%;
     background-color: rgb(44, 44, 44);
     font-size: 65px;
     cursor: pointer;
