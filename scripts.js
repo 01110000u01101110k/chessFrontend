@@ -33,11 +33,17 @@ let figureschess_pieces = [
 
 let dragged;
 
+let selectedPieces;
+
+let selectedTarget;
+
 let player_color = "white";
 
 let whos_step = "white";
 
 let is_rotate_board = true;
+
+let displaying_moves = [];
 
 /* connect to server */
 
@@ -210,6 +216,7 @@ function check_the_opposing_king(dragged) {
 
   if(opposing_king && is_right_step(dragged.parentNode, opposing_king).is_right_step) {
     console.log("check");
+    opposing_king.style.border = "2mm ridge #ffb300"
   }
 }
 
@@ -280,7 +287,7 @@ const is_right_step = (dragged, target) => {
       }
       return true;
     } else if(Math.abs(+target.dataset.cell_position_x - +dragged.dataset.cell_position_x) !== 0 && Math.abs(+target.dataset.cell_position_y - +dragged.dataset.cell_position_y) === 0) {
-      for(let i = 1; i <= Math.abs(+target.dataset.cell_position_x - +dragged.dataset.cell_position_x); i++){
+      for(let i = 1; i < Math.abs(+target.dataset.cell_position_x - +dragged.dataset.cell_position_x); i++){
         let result;
 
         if(+dragged.dataset.cell_position_x < +target.dataset.cell_position_x){
@@ -438,6 +445,53 @@ const is_right_step = (dragged, target) => {
   return {is_attack, is_right_step: false};
 }
 
+function displaying_possible_moves_clean() {
+  if(displaying_moves.length > 0){
+    displaying_moves.forEach((element) => {
+      element.style.border = "0px";
+    })
+    displaying_moves = [];
+  }
+}
+
+function displaying_possible_moves(selected) {
+  displaying_possible_moves_clean()
+
+  board.childNodes.forEach((element, index) => {
+    if(index > 0 && is_right_step(selected, element).is_right_step){
+      displaying_moves.push(element)
+    }
+  })
+
+  displaying_moves.forEach((element) => {
+    element.style.border = "1.4mm ridge rgb(138, 96, 200)"
+  })
+}
+
+board.addEventListener("click", (event) => {
+  if(!selectedPieces && event.target.dataset.color === whos_step || 
+    selectedPieces.dataset.color === event.target.dataset.color
+  ){
+    selectedPieces = event.target;
+  } else if(selectedPieces) {
+    selectedTarget = event.target
+  }
+
+  if(selectedPieces && !selectedTarget){
+    displaying_possible_moves(event.target);
+  } else if (selectedPieces && selectedTarget) {
+    const step_info = is_right_step(selectedPieces.parentNode, event.target);
+  
+    if(step_info.is_right_step){
+      dragged_target(selectedPieces, event.target, step_info.is_attack, false);
+    }
+
+    displaying_possible_moves_clean();
+    selectedPieces = null;
+    selectedTarget = null;
+  }
+})
+
 /* events fired on the draggable target */
 board.addEventListener("drag", function (event) {
   event.target.style.opacity = 0;
@@ -448,6 +502,10 @@ board.addEventListener(
   (event) => {
     dragged = event.target;
 
+    if(dragged.dataset.color === whos_step) {
+      displaying_possible_moves(dragged);
+    }  
+
     event.target.style.opacity = 1;
   },
   false
@@ -457,6 +515,9 @@ board.addEventListener(
   "dragend",
   (event) => {
     // reset the transparency
+
+    displaying_possible_moves_clean()
+
     event.target.style.opacity = "";
   },
   false
@@ -545,8 +606,6 @@ board.addEventListener(
     if(dragged.dataset.color === whos_step) {
       const step_info = is_right_step(dragged.parentNode, event.target);
 
-      console.log("step_info", step_info)
-
       if(step_info.is_right_step){
         dragged_target(dragged, event.target, step_info.is_attack, false);
       }
@@ -597,7 +656,7 @@ const create_board = () => {
     let wrap_div = board.appendChild(div);
 
     if(figureschess_pieces[y - 1][x - 1]){
-      if (y < 4) {
+      if (y < 5) {
         piece.classList.add("white_piece");
         piece.id = `white_${figureschess_pieces[y - 1][x - 1]}`;
 
