@@ -15,12 +15,25 @@
         <p class="nav_item">text</p>
     </header>
     <main class="main" id="main">
-        <div class="board" id="board">
+
+        <div class="play_field">
+            <div class="board" id="board"></div>
+            
+            <div class="retired_pieces_container">
+                <div class="retired_pieces_wrap">
+                    <p>Побитые белые фигуры:</p>
+                    <div class="retired_pieces" id="retired_white_pieces"></div>
+                </div>
+                <div class="retired_pieces_wrap">
+                    <p>Побитые черные фигуры:</p>
+                    <div class="retired_pieces" id="retired_black_pieces"></div>
+                </div>
+            </div>
         </div>
         <!--<button class="start_btn" id="start_btn">start</button>-->
 
         <div class="chat">
-            <h1>Chat!</h1>
+            <h1>Chat</h1>
 
             <div>
                 <button id="connect">Connect</button>
