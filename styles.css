@@ -48,6 +48,7 @@ p {
 
 .play_field {
   display: grid;
+  margin-top: 50px;
 }
 
 .retired_pieces_container {
@@ -61,6 +62,7 @@ p {
   width: 100%;
   height: 100%;
   justify-content: center;
+  text-align: center;
 }
 
 .retired_pieces {
@@ -127,9 +129,38 @@ p {
     cursor: pointer;
 }
 
+.popup {
+  position: absolute;
+  min-width: 400px;
+  min-height: 100px;
+  background-color: var(--second-color);
+  color: var(--main-color);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 15px;
+  font-weight: bold;
+  text-align: center;
+}
 
+.popup_header {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+}
 
+.close_btn {
+  margin-left: 15px;
+  margin-right: 15px;
+  margin-top: 15px;
+  cursor: pointer;
+}
 
+.popup_content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
   input[type='text'] {
     font-size: inherit;

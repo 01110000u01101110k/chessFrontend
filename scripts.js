@@ -265,9 +265,36 @@ function is_threats_kings() {
   return {threat_to_enemy_king: threat_to_enemy_king, threat_to_our_king: threat_to_our_king};
 }
 
-/*function is_checkmate() {
+function is_checkmate() {
+  let is_checkmate = true;
 
-}*/
+  current_position_chess_pieces.forEach((dragged) => {
+    current_position_chess_pieces.forEach((target) => {
+      if(dragged.piece &&
+         dragged.color !== whos_step
+      ){
+        const step_info = is_right_current_step(dragged, target, false);
+
+        if(step_info.is_right_step){
+          const backup_current_position_chess_pieces = current_position_chess_pieces.map(element => ({...element}));
+
+          change_piece_position(dragged, target);
+
+          let threats_kings = is_threats_kings();
+
+          if(!threats_kings.threat_to_enemy_king){
+
+            is_checkmate = false;
+          }
+
+          current_position_chess_pieces = backup_current_position_chess_pieces;
+        }
+      }
+    })
+  })
+
+  return is_checkmate;
+}
 
 const is_right_current_step = (dragged, target) => {
   let is_attack = false;
@@ -592,6 +619,40 @@ board.addEventListener(
   false
 );
 
+function create_popup(text) {
+  const popup = document.createElement("div");
+  const popup_header = document.createElement("div");
+  const popup_content = document.createElement("div");
+  const close_btn = document.createElement("div");
+
+  popup.classList.add("popup");
+  popup.id = "popup"
+
+  popup_header.classList.add("popup_header");
+
+  close_btn.classList.add("close_btn");
+  close_btn.id = "close_btn";
+  close_btn.textContent = "✕";
+
+  popup_content.textContent = text;
+
+  popup.appendChild(popup_header);
+  popup_header.appendChild(close_btn);
+  popup.appendChild(popup_content);
+  board.appendChild(popup);
+
+  close_btn.addEventListener("click", close_popup)
+}
+
+function close_popup(){
+  const popup = document.getElementById("popup");
+
+  const close_btn = document.getElementById("close_btn");
+  close_btn.removeEventListener("click", close_popup);
+  
+  popup.remove();
+}
+
 function dragged_target(dragged, target, attacked, is_from_server) {
   target.style.background = "";
 
@@ -612,8 +673,10 @@ function dragged_target(dragged, target, attacked, is_from_server) {
     }
 
     if(target_child.dataset.color === "white") {
+      target_child.style.width = "40px";
       retired_white_pieces.appendChild(target_child);
     } else {
+      target_child.style.width = "40px";
       retired_black_pieces.appendChild(target_child);
     }
 
@@ -651,6 +714,22 @@ function find_piece(dragged_piece) {
   return result;
 }
 
+function change_piece_position(dragged, target) {
+  current_position_chess_pieces.map((element) => {
+    if(element.cell_position_x == (dragged.dataset ? dragged.dataset.cell_position_x : dragged.cell_position_x) && 
+      element.cell_position_y == (dragged.dataset ? dragged.dataset.cell_position_y : dragged.cell_position_y)
+    ){
+      element.piece = null;
+      element.color = null;
+    } else if(element.cell_position_x == (target.dataset ? target.dataset.cell_position_x : target.cell_position_x) && 
+      element.cell_position_y == (target.dataset ? target.dataset.cell_position_y : target.cell_position_y)
+    ){
+      element.piece = dragged.dataset ? dragged.children[0].textContent : dragged.piece;
+      element.color = dragged.dataset ? dragged.children[0].dataset.color : dragged.color;
+    }
+  })
+}
+
 function check_rules(dragged, target, is_from_server) {
   if(dragged && target){
     if(!dragged.dataset.cell_position_x){
@@ -671,33 +750,19 @@ function check_rules(dragged, target, is_from_server) {
 
         const backup_current_position_chess_pieces = current_position_chess_pieces.map(element => ({...element}));
 
-        current_position_chess_pieces.map((element) => {
-          if(element.cell_position_x == dragged.dataset.cell_position_x && 
-            element.cell_position_y == dragged.dataset.cell_position_y
-          ){
-            element.piece = null;
-            element.color = null;
-          } else if(element.cell_position_x == target.dataset.cell_position_x && 
-            element.cell_position_y == target.dataset.cell_position_y
-          ){
-            element.piece = dragged.children[0].textContent;
-            element.color = dragged.children[0].dataset.color;
-          }
-        })
-
-        console.log(current_position_chess_pieces)
-        console.log(backup_current_position_chess_pieces)
+        change_piece_position(dragged, target);
 
         let threats_kings = is_threats_kings();
 
-        //dragged_target(dragged, target, step_info.is_attack, is_from_server);
-
-        //console.log("threats_kings", threats_kings)
-
-        if(!threats_kings.threat_to_our_king){
+        if(threats_kings.threat_to_our_king){
+          current_position_chess_pieces = backup_current_position_chess_pieces;
+        } else if(threats_kings.threat_to_enemy_king){
+          if(is_checkmate()){
+            create_popup(`${whos_step} wins`);
+          }
           dragged_target(dragged, target, step_info.is_attack, false);
         } else {
-          current_position_chess_pieces = backup_current_position_chess_pieces;
+          dragged_target(dragged, target, step_info.is_attack, false);
         }
       }
     }
