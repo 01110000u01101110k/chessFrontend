@@ -11,6 +11,7 @@ const input = document.getElementById('chat_input');
 const retired_white_pieces = document.getElementById("retired_white_pieces");
 const retired_black_pieces = document.getElementById("retired_black_pieces");
 const restart_btn = document.getElementById("restart_btn");
+const give_up_btn = document.getElementById("give_up_btn");
 
 //start_button.addEventListener("click", start);
 
@@ -56,6 +57,7 @@ let displaying_moves = [];
 
 const chess_step = "chess-step";
 const restart_game = "restart-game";
+const give_up = "give_up";
 
 let socket = null;
 
@@ -85,6 +87,8 @@ function connect() {
       update_position(event.data);
     } else if(event.data.indexOf(restart_game) > -1) {
       create_board();
+    } else if(event.data.indexOf(give_up) > -1){
+      call_give_up();
     }
     set_log('Received: ' + event.data, 'message');
   }
@@ -767,7 +771,7 @@ function check_rules(dragged, target, is_from_server) {
           current_position_chess_pieces = backup_current_position_chess_pieces;
         } else if(threats_kings.threat_to_enemy_king){
           if(is_checkmate()){
-            create_popup(`${whos_step} wins`);
+            create_popup(`${whos_step.charAt(0).toUpperCase() + whos_step.slice(1)} wins, checkmate.`);
           }
           dragged_target(dragged, target, step_info.is_attack, false);
         } else {
@@ -911,12 +915,19 @@ const create_board = () => {
   }*/
 };
 
-create_board();
+give_up_btn.addEventListener("click", () => {
+  if(socket){
+    socket.send(`${give_up}`);
+  }
+  call_give_up();
+})
 
-const spawn_pieces = () => {
-  //initial_position_chess_pieces.forEach(element => board.innerHTML += element);
-};
-
-function start() {
-  spawn_pieces();
+function call_give_up() {
+  if(whos_step === "white") {
+    create_popup("Black wins. The enemy surrendered");
+  } else {
+    create_popup("White wins. The enemy surrendered");
+  }
 }
+
+create_board();
