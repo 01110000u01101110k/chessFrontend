@@ -6,6 +6,7 @@
     --main-color: rgb(36, 36, 36);
     --second-color: rgb(234, 182, 28);
     --third-color: rgb(210, 210, 210);
+    --error-color: rgb(255, 85, 57);
 }
 
 body {
@@ -48,19 +49,51 @@ p {
 }
 
 .head_panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
   margin-top: 10px;
   margin-bottom: 10px;
   margin-left: 20px;
   margin-right: 20px;
 }
 
-.head_panel_btn {
-  min-width: 30px;
-  min-height: 30px;
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  background: var(--second-color);
+  border: 0;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.restart_icon {
+  width: 20px;
+  height: auto;
+}
+
+.connect_form {
+  display: flex;
+  gap: 5px;
+}
+
+.connect_input {
+  width: 90px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 10px;
 }
 
 .play_field {
   display: grid;
+  justify-content: center;
   margin: 10px;
 }
 
@@ -82,11 +115,6 @@ p {
   display: flex;
   height: 100%;
   font-size: 40px;
-}
-
-.chat {
-  width: 200px;
-  margin: 10px;
 }
 
 .board {
@@ -175,43 +203,62 @@ p {
   align-items: center;
 }
 
-  input[type='text'] {
-    font-size: inherit;
-  }
+input[type='text'] {
+  font-size: inherit;
+}
 
-  #log {
-    width: 30em;
-    height: 20em;
-    overflow: auto;
-    margin: 0.5em 0;
+.chat {
+  width: 100%;
+  margin: 10px;
+}
 
-    border: 1px solid black;
-  }
+.chat_body {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
 
-  #status {
-    padding: 0 0.2em;
-  }
+.logs {
+  height: 20em;
+  overflow: auto;
+  margin: 0.5em 0;
+  border: 1px solid var(--second-color);
+  border-radius: 15px;
+}
 
-  #text {
-    width: 17em;
-    padding: 0.5em;
-  }
+.chat_form {
+  display: flex;
+  gap: 10px;
+}
 
-  .msg {
-    margin: 0;
-    padding: 0.25em 0.5em;
-  }
+.chat_input{
+  width: 100%;
+  padding: 0.5em;
+  border-radius: 15px;
+}
 
-  .msg--status {
-    /* a light yellow */
-    background-color: #ffffc9;
-  }
+.status {
+  padding: 10px;
+  border-radius: 10px;
+}
 
-  .msg--message {
-    /* a light blue */
-    background-color: #d2f4ff;
-  }
+.msg {
+  margin: 0;
+  padding: 0.25em 0.5em;
+}
 
-  .msg--error {
-    background-color: pink;
-  }
+.msg--status {
+  /* a light yellow */
+  background-color: var(--second-color);
+  color: var(--main-color);
+}
+
+.msg--message {
+  /* a light blue */
+  background-color: transparent;
+  color: var(--third-color);
+}
+
+.msg--error {
+  background-color: var(--error-color);
+  color: var(--third-color);
+}

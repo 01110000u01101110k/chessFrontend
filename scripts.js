@@ -1,14 +1,16 @@
 const board = document.getElementById("board");
 //const start_button = document.getElementById("start_btn");
 
-const status = document.getElementById('status')
-const connectButton = document.getElementById('connect')
-const log = document.getElementById('log')
-const form = document.getElementById('chatform')
-const input = document.getElementById('text')
+const status = document.getElementById('status');
+const connect_form = document.getElementById("connect_form");
+const connect_input = document.getElementById("connect_input");
+const connectButton = document.getElementById('connect');
+const log = document.getElementById('log');
+const chat_form = document.getElementById('chat_form');
+const input = document.getElementById('chat_input');
 const retired_white_pieces = document.getElementById("retired_white_pieces");
 const retired_black_pieces = document.getElementById("retired_black_pieces");
-const head_panel_btn = document.getElementById("head_panel_btn");
+const restart_btn = document.getElementById("restart_btn");
 
 //start_button.addEventListener("click", start);
 
@@ -78,13 +80,13 @@ function connect() {
     updateConnectionStatus();
   }
 
-  socket.onmessage = (ev) => {
-    if(ev.data.indexOf(chess_step) > -1){
-      update_position(ev.data);
-    } else if(ev.data.indexOf(restart_game) > -1) {
+  socket.onmessage = (event) => {
+    if(event.data.indexOf(chess_step) > -1){
+      update_position(event.data);
+    } else if(event.data.indexOf(restart_game) > -1) {
       create_board();
     }
-    set_log('Received: ' + ev.data, 'message');
+    set_log('Received: ' + event.data, 'message');
   }
 
   socket.onclose = () => {
@@ -127,16 +129,16 @@ function disconnect() {
 
 function updateConnectionStatus() {
   if (socket) {
-    status.style.backgroundColor = 'transparent';
-    status.style.color = 'green';
+    status.style.backgroundColor = 'rgb(113, 45, 234)';
+    status.style.color = 'rgb(210, 210, 210)';
     status.textContent = `connected`;
     connectButton.innerHTML = 'Disconnect';
-    input.focus();
+    connect_input.focus();
   } else {
-    status.style.backgroundColor = 'red';
-    status.style.color = 'white';
+    status.style.backgroundColor = 'rgb(255, 85, 57)';
+    status.style.color = 'rgb(210, 210, 210)';
     status.textContent = 'disconnected';
-    connectButton.textContent = 'Connect';
+    connectButton.textContent = 'Connect to room';
   }
 }
 
@@ -150,8 +152,20 @@ connectButton.addEventListener('click', () => {
   updateConnectionStatus();
 })
 
-form.addEventListener('submit', (ev) => {
-  ev.preventDefault();
+connect_form.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  const text = connect_input.value;
+
+  set_log('Connecting: ' + text);
+  socket.send(text);
+
+  connect_input.value = '';
+  connect_input.focus();
+})
+
+chat_form.addEventListener('submit', (event) => {
+  event.preventDefault();
 
   const text = input.value;
 
@@ -784,7 +798,7 @@ board.addEventListener(
   false
 );
 
-head_panel_btn.addEventListener("click", () => {
+restart_btn.addEventListener("click", () => {
   if(socket){
     socket.send(`${restart_game}`);
   }

@@ -17,9 +17,18 @@
     <main class="main" id="main">
 
         <div class="head_panel" id="head_panel">
-            <button class="head_panel_btn" id="head_panel_btn">
-                <img class="icon" src="./icons/undo-alt.svg" alt="undo">
+            <button class="btn" id="restart_btn">
+                <span> restart game </span>
+                <img class="restart_icon" src="./icons/undo-alt.svg" alt="undo">
             </button>
+            <form class="connect_form" id="connect_form">
+                <input class="connect_input" type="text" id="connect_input" placeholder="room" />
+                <button class="btn" id="connect">Connect to room</button>
+            </form>
+            <div class="status_info">
+                <span>Status:</span>
+                <span class="status" id="status">disconnected</span>
+            </div>
         </div>
 
         <div class="play_field">
@@ -41,18 +50,16 @@
         <div class="chat">
             <h1>Chat</h1>
 
-            <div>
-                <button id="connect">Connect</button>
-                <span>Status:</span>
-                <span id="status">disconnected</span>
+            <div class="chat_body">
+                <div class="logs" id="log"></div>
+
+                <form class="chat_form" id="chat_form">
+                    <input class="chat_input" type="text" id="chat_input" placeholder="message" />
+                    <button class="btn" type="submit" id="send">
+                        Отправить
+                    </button>
+                </form>
             </div>
-
-            <div id="log"></div>
-
-            <form id="chatform">
-                <input type="text" id="text" />
-                <input type="submit" id="send" />
-            </form>
 
             <hr />
 
