@@ -8,6 +8,7 @@ const form = document.getElementById('chatform')
 const input = document.getElementById('text')
 const retired_white_pieces = document.getElementById("retired_white_pieces");
 const retired_black_pieces = document.getElementById("retired_black_pieces");
+const head_panel_btn = document.getElementById("head_panel_btn");
 
 //start_button.addEventListener("click", start);
 
@@ -52,6 +53,7 @@ let displaying_moves = [];
 /* connect to server */
 
 const chess_step = "chess-step";
+const restart_game = "restart-game";
 
 let socket = null;
 
@@ -79,6 +81,8 @@ function connect() {
   socket.onmessage = (ev) => {
     if(ev.data.indexOf(chess_step) > -1){
       update_position(ev.data);
+    } else if(ev.data.indexOf(restart_game) > -1) {
+      create_board();
     }
     set_log('Received: ' + ev.data, 'message');
   }
@@ -95,7 +99,6 @@ function update_position(data_from_server) {
 
   let piece_from;
   let piece_to;
-  let is_attacked = data[4];
 
   board.childNodes.forEach((element, index) => {
     if(index > 0) {
@@ -109,13 +112,6 @@ function update_position(data_from_server) {
     }
   });
 
-  if(is_attacked === "true"){
-    is_attacked = true;
-  } else {
-    is_attacked = false;
-  }
-
-  //dragged_target(piece_from, piece_to, is_attacked, true);
   check_rules(piece_from, piece_to, true);
 }
 
@@ -283,7 +279,6 @@ function is_checkmate() {
           let threats_kings = is_threats_kings();
 
           if(!threats_kings.threat_to_enemy_king){
-
             is_checkmate = false;
           }
 
@@ -669,7 +664,7 @@ function dragged_target(dragged, target, attacked, is_from_server) {
 
   if(attacked){
     if(socket && !is_from_server){
-      socket.send(`${chess_step} ${dragged.dataset.cell_position_x}_${dragged.dataset.cell_position_y}_${target.dataset.cell_position_x}_${target.dataset.cell_position_y}_${attacked}`)
+      socket.send(`${chess_step} ${dragged.dataset.cell_position_x}_${dragged.dataset.cell_position_y}_${target.dataset.cell_position_x}_${target.dataset.cell_position_y}`)
     }
 
     if(target_child.dataset.color === "white") {
@@ -684,7 +679,7 @@ function dragged_target(dragged, target, attacked, is_from_server) {
     target.appendChild(drag_child);
   } else {
     if(socket && !is_from_server){
-      socket.send(`${chess_step} ${dragged.dataset.cell_position_x}_${dragged.dataset.cell_position_y}_${target.dataset.cell_position_x}_${target.dataset.cell_position_y}_${attacked}`);
+      socket.send(`${chess_step} ${dragged.dataset.cell_position_x}_${dragged.dataset.cell_position_y}_${target.dataset.cell_position_x}_${target.dataset.cell_position_y}`);
     }
 
     dragged.removeChild(drag_child);
@@ -789,6 +784,28 @@ board.addEventListener(
   false
 );
 
+head_panel_btn.addEventListener("click", () => {
+  if(socket){
+    socket.send(`${restart_game}`);
+  }
+  create_board();
+})
+
+function remove_board() {
+  if(board.childNodes.length > 0){
+    board.innerHTML = null;
+    current_position_chess_pieces = [];
+    dragged = null;
+    selectedPieces = null;
+    selectedTarget = null;
+    displaying_moves = [];
+    whos_step = "white";
+
+    retired_white_pieces.innerHTML = null;
+    retired_black_pieces.innerHTML = null;
+  }
+}
+
 const create_board = () => {
   let switch_parity_y = true;
 
@@ -796,6 +813,8 @@ const create_board = () => {
   let y = 1;
 
   let color_piece = "black";
+
+  remove_board();
 
   const try_change_color_piece = () => {
     if (y < 5 && color_piece !== "white") {
